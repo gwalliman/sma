@@ -4,7 +4,8 @@ package org.asu.sma;
  * Creates an object representation of a Salesforce Metadata file.
  * @author aesanch2
  */
-public class SMAMetadata {
+public class SMAMetadata
+{
     private String extension;
     private String container;
     private String member;
@@ -26,7 +27,8 @@ public class SMAMetadata {
      * @param metaxml
      */
     public SMAMetadata(String extension, String container, String member,
-                       String metadataType, String path, boolean destructible, boolean valid, boolean metaxml) {
+                       String metadataType, String path, boolean destructible, boolean valid, boolean metaxml)
+    {
         this.extension = extension;
         this.container = container;
         this.member = member;

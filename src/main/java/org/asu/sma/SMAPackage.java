@@ -6,17 +6,20 @@ import java.util.ArrayList;
  * Helper class for generating both build.xml and package.xml files.
  * @author aesanch2
  */
-public class SMAPackage {
+public class SMAPackage
+{
     private String destination;
     private String workspace;
     private ArrayList<String> contents;
     private boolean destructiveChange;
+
     //Project configuration variables
     private boolean validateOnly;
     private boolean generateUnitTests;
     private String username;
     private String password;
     private String server;
+
     //Global configuration variables
     private String pluginHome;
     private String runTestRegex;
@@ -30,15 +33,19 @@ public class SMAPackage {
      * @param destructiveChange
      */
     public SMAPackage(String destination, ArrayList<String> contents,
-                      boolean destructiveChange){
+                      boolean destructiveChange)
+    {
         this.destination = destination;
         this.contents = contents;
         this.destructiveChange = destructiveChange;
 
         //Modify the location of the SMAPackage based on what xml file we're representing.
-        if(destructiveChange){
+        if(destructiveChange)
+        {
             this.destination = destination + "/src/destructiveChanges.xml";
-        } else {
+        }
+        else
+        {
             this.destination = destination + "/src/package.xml";
         }
     }
@@ -56,7 +63,8 @@ public class SMAPackage {
     public SMAPackage(String destination, ArrayList<String> contents, String jenkinsHome,
                       String runTestRegex, String pollWait, String maxPoll,
                       boolean generateUnitTests, boolean validateOnly,
-                      String username, String password, String server){
+                      String username, String password, String server)
+    {
         this.contents = contents;
         this.runTestRegex = runTestRegex;
         this.pollWait = pollWait;
@@ -66,9 +74,12 @@ public class SMAPackage {
         this.username = username;
         this.server = server;
 
-        if (password.isEmpty()){
+        if (password.isEmpty())
+        {
             this.password = "{$sf.password}";
-        }else{
+        }
+        else
+        {
             this.password = password;
         }
 

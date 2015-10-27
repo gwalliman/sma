@@ -28,8 +28,10 @@ public class SMAUtility {
      * @param destination
      * @param xmlToWrite
      */
-    public static void writeXML(String destination, Document xmlToWrite){
-        try {
+    public static void writeXML(String destination, Document xmlToWrite)
+    {
+        try
+        {
             //Prepare the workspace for the manifest
             File directory = new File(FilenameUtils.getFullPath(destination));
             directory.mkdirs();
@@ -46,7 +48,9 @@ public class SMAUtility {
             transformer.transform(source, result);
 
             LOG.info("Saved xml file to " + destination);
-        }catch(Exception e){
+        }
+        catch(Exception e)
+        {
             e.printStackTrace();
         }
 
@@ -57,7 +61,8 @@ public class SMAUtility {
      * @param fileName
      * @throws IOException
      */
-    public static void removeFirstLine(String fileName) throws IOException {
+    public static void removeFirstLine(String fileName) throws IOException
+    {
         RandomAccessFile raf = new RandomAccessFile(fileName, "rw");
         //Initial write position
         long writePosition = raf.getFilePointer();
@@ -67,7 +72,8 @@ public class SMAUtility {
 
         byte[] buff = new byte[1024];
         int n;
-        while (-1 != (n = raf.read(buff))) {
+        while (-1 != (n = raf.read(buff)))
+        {
             raf.seek(writePosition);
             raf.write(buff, 0, n);
             readPosition += n;
@@ -118,13 +124,17 @@ public class SMAUtility {
      */
     public static ArrayList<SMAMetadata> generate(ArrayList<String> destructiveChanges,
                                                                   ArrayList<String> changes,
-                                                                  String deployStage){
+                                                                  String deployStage)
+    {
         Boolean isDestructiveChange = true;
-        //Generate the destructiveChanges.xml file
-        if(!destructiveChanges.isEmpty()){
+
+        //If we're deleting files, generate destructiveChanges.xml
+        if(!destructiveChanges.isEmpty())
+        {
             SMAPackage destructiveManifest = new SMAPackage(deployStage, destructiveChanges, isDestructiveChange);
             SMAManifestGenerator.generateManifest(destructiveManifest);
         }
+
         //Generate the package.xml file
         SMAPackage packageManifest = new SMAPackage(deployStage, changes, !isDestructiveChange);
         return SMAManifestGenerator.generateManifest(packageManifest);
@@ -136,9 +146,9 @@ public class SMAUtility {
      * @param buildTag The build tag created by Jenkins for this job.
      * @throws Exception
      */
-    public static String zipRollbackPackage(File rollbackDirectory, String buildTag) throws Exception{
-        String zipFile = "/"+ FilenameUtils.getPath(rollbackDirectory.getPath()) + buildTag
-                + "-SMArollback.zip";
+    public static String zipRollbackPackage(File rollbackDirectory, String buildTag) throws Exception
+    {
+        String zipFile = "/" + FilenameUtils.getPath(rollbackDirectory.getPath()) + buildTag + "-SMArollback.zip";
         String srcDir = rollbackDirectory.getPath();
 
         FileOutputStream fop = new FileOutputStream(zipFile);
@@ -146,6 +156,7 @@ public class SMAUtility {
 
         File srcFile = new File(srcDir);
 
+        //Zip the file
         addDirToArchive(zop, srcFile);
 
         zop.close();
@@ -160,11 +171,14 @@ public class SMAUtility {
      * @param srcFile The files in this directory to be zipped.
      * @throws Exception
      */
-    private static void addDirToArchive(ZipOutputStream zop, File srcFile) throws Exception{
+    private static void addDirToArchive(ZipOutputStream zop, File srcFile) throws Exception
+    {
         File[] files = srcFile.listFiles();
 
-        for (File file : files){
-            if (file.isDirectory()){
+        for (File file : files)
+        {
+            if (file.isDirectory())
+            {
                 addDirToArchive(zop, file);
                 continue;
             }
@@ -175,7 +189,8 @@ public class SMAUtility {
             zop.putNextEntry(new ZipEntry(file.getName()));
 
             int length;
-            while((length = fis.read(buffer)) > 0){
+            while((length = fis.read(buffer)) > 0)
+            {
                 zop.write(buffer, 0, length);
             }
 
@@ -189,11 +204,15 @@ public class SMAUtility {
      * @param changeSet The SMAMetadata objects that were created for this change
      * @return A boolean value indicating the presence of ApexClasses or ApexTriggers.
      */
-    public static boolean apexChangesPresent(ArrayList<SMAMetadata> changeSet){
+    public static boolean apexChangesPresent(ArrayList<SMAMetadata> changeSet)
+    {
         boolean apexPresent = false;
 
-        for(SMAMetadata metadata : changeSet){
-            if (metadata.getMetadataType().equals("ApexClass") || metadata.getMetadataType().equals("ApexTrigger")){
+        //If any of the added / changed files are an Apex class or trigger, return TRUE
+        for(SMAMetadata metadata : changeSet)
+        {
+            if (metadata.getMetadataType().equals("ApexClass") || metadata.getMetadataType().equals("ApexTrigger"))
+            {
                 apexPresent = true;
             }
         }

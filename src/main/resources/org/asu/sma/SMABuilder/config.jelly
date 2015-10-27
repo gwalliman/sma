@@ -1,3 +1,6 @@
+<!--
+    Manage these settings at $JENKINS/job/$JOBNAME/configure
+-->
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
     <f:block>
         <f:optionalBlock name="generateManifests"

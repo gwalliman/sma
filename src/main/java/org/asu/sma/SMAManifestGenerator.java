@@ -20,8 +20,8 @@ import java.util.logging.Logger;
  * Utility class that generates the package manifest XML file.
  * @author aesanch2
  */
-public class SMAManifestGenerator {
-
+public class SMAManifestGenerator
+{
     private static final Logger LOG = Logger.getLogger(SMAManifestGenerator.class.getName());
 
     /**
@@ -29,10 +29,12 @@ public class SMAManifestGenerator {
      * @param manifestPackage
      * @return The ArrayList of APMGMetadataObjects that are to be deployed in this job.
      */
-    public static ArrayList<SMAMetadata> generateManifest(SMAPackage manifestPackage){
+    public static ArrayList<SMAMetadata> generateManifest(SMAPackage manifestPackage)
+    {
         ArrayList<SMAMetadata> contents = new ArrayList<SMAMetadata>();
 
-        try {
+        try
+        {
             //Create the manifest
             DocumentBuilderFactory manifestFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder manifestBuilder = manifestFactory.newDocumentBuilder();
@@ -51,13 +53,22 @@ public class SMAManifestGenerator {
             SMAMetadata metadata;
             Boolean typeExists;
             String xpathExpr;
+
+            //SMAMetadataXMLDocument is a subclass inside SMAManifestGenerator containing info and functions for Metadata API
+            //Initialize it (read in an external XML file)
             SMAMetadataXMLDocument.initDocument();
-            for(String repoItem : manifestPackage.getContents()){
+
+            //For each file within the manifest package
+            for(String repoItem : manifestPackage.getContents())
+            {
+                //Get an APMGMetadataObject representing this item
                 metadata = SMAMetadataXMLDocument.createMetadataObject(repoItem);
 
                 //Handle unknown members
-                if(metadata.getMetadataType().equals("Invalid")) {
-                    if (metadata.getFullName().contains("-meta")){
+                if(metadata.getMetadataType().equals("Invalid"))
+                {
+                    if (metadata.getFullName().contains("-meta"))
+                    {
                         LOG.warning(metadata.getFullName() + " is not a valid member of the API");
                         continue;
                     }
@@ -70,9 +81,12 @@ public class SMAManifestGenerator {
                 LOG.finest("Path is " + metadata.getPath());
 
                 //Check to make sure the metadata can be deleted if this is a destructiveChange
-                if (!metadata.isDestructible() && manifestPackage.isDestructiveChange()){
+                if (!metadata.isDestructible() && manifestPackage.isDestructiveChange())
+                {
                     LOG.warning(metadata.getFullName() + " cannot be deleted via the API");
-                }else{
+                }
+                else
+                {
                     //Query the document to see if the metadataType node already exists for this metadata
                     xpathExpr = "//name[text()='" + metadata.getMetadataType() + "']";
                     query = xpath.compile(xpathExpr);
@@ -85,20 +99,27 @@ public class SMAManifestGenerator {
                     newMember.setTextContent(metadata.getMember());
 
                     //This sections is where the member and/or typename is added to the package manifest
-                    if (typeExists){
+                    if (typeExists)
+                    {
                         //Find the type node that this member should be appended to
                         NodeList nameNodes = manifest.getElementsByTagName("name");
-                        for (int iterator = 0; iterator < nameNodes.getLength(); iterator++) {
+                        for (int iterator = 0; iterator < nameNodes.getLength(); iterator++)
+                        {
                             Element name = (Element) nameNodes.item(iterator);
 
-                            if(name.getTextContent().equals(metadata.getMetadataType())){
+                            if(name.getTextContent().equals(metadata.getMetadataType()))
+                            {
                                 Node parentType = name.getParentNode();
                                 parentType.appendChild(newMember);
                                 break;
                             }
                         }
+
+                        //Add the Metadata item to the ArrayList
                         contents.add(metadata);
-                    }else{
+                    }
+                    else
+                    {
                         //Generate a new type and name node
                         LOG.fine("Generating new type and name for " + metadata.getMetadataType());
                         Element newType = manifest.createElement("types");
@@ -107,12 +128,12 @@ public class SMAManifestGenerator {
                         newType.appendChild(newName);
                         newType.appendChild(newMember);
                         rootElement.appendChild(newType);
+
+                        //Add the Metadata item to the ArrayList
                         contents.add(metadata);
                     }
                 }
             }
-
-
 
             //Add the version element to the manifest
             String version = SMAMetadataXMLDocument.getAPIVersion();
@@ -122,7 +143,9 @@ public class SMAManifestGenerator {
 
             //Write the manifest
             SMAUtility.writeXML(manifestPackage.getDestination(), manifest);
-        }catch(Exception e){
+        }
+        catch(Exception e)
+        {
             e.printStackTrace();
         }
 
@@ -133,7 +156,8 @@ public class SMAManifestGenerator {
      * Sub-class for the salesforceMetadata.xml document that contains Salesforce Metadata API information.
      * @author aesanch2
      */
-    public static final class SMAMetadataXMLDocument {
+    public static final class SMAMetadataXMLDocument
+    {
         private static final ClassLoader loader = SMAManifestGenerator.SMAMetadataXMLDocument.class.getClassLoader();
         private static String pathToResource = loader.getResource("org/asu/sma/salesforceMetadata.xml").toString();
         private static Document doc;
@@ -142,7 +166,8 @@ public class SMAManifestGenerator {
          * Initializes the Document representation of the salesforceMetadata.xml file
          * @throws Exception
          */
-        public static void initDocument() throws Exception {
+        public static void initDocument() throws Exception
+        {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dbBuilder = dbFactory.newDocumentBuilder();
             doc = dbBuilder.parse(pathToResource);
@@ -152,7 +177,8 @@ public class SMAManifestGenerator {
          * Returns the path to the salesforceMetadata.xml resource.
          * @return The path to the salesforceMetadata.xml resource.
          */
-        public static String getPathToResource() {
+        public static String getPathToResource()
+        {
             return pathToResource;
         }
 
@@ -160,7 +186,8 @@ public class SMAManifestGenerator {
          * Returns the Document object representation of the salesforceMetadata.xml file.
          * @return The Document object representation of the salesforceMetadata.xml file.
          */
-        public static Document getDoc() {
+        public static Document getDoc()
+        {
             return doc;
         }
 
@@ -168,7 +195,8 @@ public class SMAManifestGenerator {
          * Returns the Salesforce Metadata API Version
          * @return A string representing the API version number.
          */
-        public static String getAPIVersion() {
+        public static String getAPIVersion()
+        {
             String version = null;
 
             doc.getDocumentElement().normalize();
@@ -192,7 +220,8 @@ public class SMAManifestGenerator {
          * @return An APMGMetadataObject representation of a file.
          * @throws Exception
          */
-        public static SMAMetadata createMetadataObject(String filename) throws Exception{
+        public static SMAMetadata createMetadataObject(String filename) throws Exception
+        {
             String container = "empty";
             String metadataType = "Invalid";
             boolean destructible = false;
@@ -206,31 +235,33 @@ public class SMAManifestGenerator {
             String extension = FilenameUtils.getExtension(filename);
             String path = FilenameUtils.getFullPath(filename);
 
-
             //Normalize the document
             doc.getDocumentElement().normalize();
 
+            //Get all the extension nodes
             NodeList extNodes = doc.getElementsByTagName("extension");
 
-            //Get the node with the corresponding extension and get the relevant information for
-            //creating the APMGMetadataObject
-            for (int iterator = 0; iterator < extNodes.getLength(); iterator++) {
+            //Iterate over each extension node and find the one that matches the current file
+            for (int iterator = 0; iterator < extNodes.getLength(); iterator++)
+            {
                 Node curNode = extNodes.item(iterator);
 
                 Element element = (Element)curNode;
-                if(element.getAttribute("name").equals(extension)){
+
+                //Populate all the info about the filetype we have found
+                if(element.getAttribute("name").equals(extension))
+                {
                     container =  element.getElementsByTagName("container").item(0).getTextContent();
                     metadataType = element.getElementsByTagName("metadata").item(0).getTextContent();
-                    destructible = Boolean.parseBoolean(element.getElementsByTagName("destructible").item(0).
-                            getTextContent());
+                    destructible = Boolean.parseBoolean(element.getElementsByTagName("destructible").item(0).getTextContent());
                     valid = true;
                     metaxml = Boolean.parseBoolean(element.getElementsByTagName("metaxml").item(0).getTextContent());
                     break;
                 }
             }
 
-            return new SMAMetadata(extension, container, member, metadataType,
-                    path, destructible, valid, metaxml);
+            //Return an APMGMetadataObject representing the file
+            return new SMAMetadata(extension, container, member, metadataType, path, destructible, valid, metaxml);
         }
     }
 }

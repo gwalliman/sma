@@ -11,6 +11,9 @@
     tags they use. Views are always organized according to its owner class,
     so it should be straightforward to find them.
   -->
+  <!--
+    Manage these settings at $JENKINS/jenkins/configure
+  -->
   <f:section title="Salesforce Migration Assistant">
       <f:entry title="Test Class Filter" field="runTestRegex">
           <f:textbox default="${descriptor.runTestRegex}"/>

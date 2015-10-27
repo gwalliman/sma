@@ -21,8 +21,10 @@ public class SMABuildGenerator {
      * Generates an xml file for salesforce deployments. Can also generate unit tests for the default namespace.
      * @param buildPackage
      */
-    public static String generateBuildFile(SMAPackage buildPackage, Boolean apexChangePresent){
-        try{
+    public static String generateBuildFile(SMAPackage buildPackage, Boolean apexChangePresent)
+    {
+        try
+        {
             //Create the build file
             DocumentBuilderFactory antFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder antBuilder = antFactory.newDocumentBuilder();
@@ -64,21 +66,37 @@ public class SMABuildGenerator {
             sfDeploy.setAttribute("maxPoll", buildPackage.getMaxPoll());
             sfDeploy.setAttribute("pollWaitMillis", buildPackage.getPollWait());
             sfDeploy.setAttribute("deployRoot", buildPackage.getWorkspace());
-            if(buildPackage.isValidateOnly()){
+            if(buildPackage.isValidateOnly())
+            {
                 sfDeploy.setAttribute("checkOnly", "true");
-            }else {
+            }
+            else
+            {
                 sfDeploy.setAttribute("checkOnly", "false");
             }
 
             //If indicated and there are .cls or .trigger changes, create the test suite
-            if(buildPackage.isGenerateUnitTests() && apexChangePresent){
+            if(buildPackage.isGenerateUnitTests() && apexChangePresent)
+            {
+                //Load an XML file representing all SF metadata types
                 SMAManifestGenerator.SMAMetadataXMLDocument.initDocument();
+
+                //Get the regex that will find all our unit tests
                 String testPattern = buildPackage.getRunTestRegex();
-                for (String file : buildPackage.getContents()){
-                    if(file.matches(testPattern)){
-                        SMAMetadata testClass = SMAManifestGenerator.SMAMetadataXMLDocument.
-                                createMetadataObject(file);
-                        if(testClass.hasMetaxml()){
+
+                //For each file in the build package
+                for (String file : buildPackage.getContents())
+                {
+                    //If this is a test file
+                    if(file.matches(testPattern))
+                    {
+                        //Get a representation of the file as a SMAMetadata object
+                        SMAMetadata testClass = SMAManifestGenerator.SMAMetadataXMLDocument.createMetadataObject(file);
+
+                        //If the test class has a metadata xml file
+                        if(testClass.hasMetaxml())
+                        {
+                            //Add a note to run this test upon build
                             Element runTest = build.createElement("runTest");
                             runTest.setTextContent(testClass.getMember());
                             sfDeploy.appendChild(runTest);
@@ -90,10 +108,15 @@ public class SMABuildGenerator {
 
             //Write the build file
             SMAUtility.writeXML(buildPackage.getDestination(), build);
+
+            //Remove the first line from build.xml (why?)
             SMAUtility.removeFirstLine(buildPackage.getDestination());
-        }catch(Exception e){
+        }
+        catch(Exception e)
+        {
             e.printStackTrace();
         }
+
         return buildPackage.getDestination();
     }
 }
